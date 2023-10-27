@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: eg
+  namespace: shared
+spec:
+  gatewayClassName: eg-shared
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 8080
+      allowedRoutes:  
+        namespaces:
+          from: Selector
+          selector:
+            matchExpressions:
+            - key: kubernetes.io/metadata.name
+              operator: In
+              values:
+              - tenant-b
+              - tenant-c

@@ -1,0 +1,91 @@
+digraph {
+	// Base Styling
+	rankdir="TB";
+	splines=true;
+	overlap=false;
+	nodesep="0.2";
+	ranksep="0.4";
+    bgcolor="transparent";
+	// label="Some Title";
+	labelloc="t";
+	fontname="Montserrat";
+	node [ fontname="Montserrat" margin=0.28 shape="plaintext" style="filled, rounded" ];
+	edge [ fontname="Montserrat" color="#2B303A" ];
+
+	// List of Nodes
+
+	// base nodes
+	// reality [ label="Reality" fillcolor="#2B303A" fontcolor="#ffffff" ]
+	// attack_win [ label="Access video\nrecordings in\nS3 bucket\n(attackers win)" fillcolor="#DB2955" fontcolor="#ffffff" ]
+
+	// green nodes == OR nodes
+	node [ color="#D6E9D5" ]
+	malicious_route [ label="Malicious \nHTTPRoute" ]
+	misconfigured_shared_gw [ label="Shared gateway \nlistener supports \nmalicious ns" ]
+	
+	
+
+	// blue nodes == AND nodes
+	node [ color="#84BCE6" ]
+	route_traffic [ label="Route traffic to \nmalicious endpoint" ]
+	single_gw_route [ label="Route references \nsingle tenant \ngateway" ]
+	single_tenant_route [ label="HTTPRoute created in \nsingle tenant ns" ]
+
+
+	// white nodes == single nodes
+	node [ color="#DDDDDD" ]
+	social_engineering [ label="Social \nengineering" ]
+	shared_gw_route [ label="Route references \nshared gateway" ]
+	malicious_admin [ label="Malicious admin" ]
+	custom_label [ label="Gateway listener \nmatches custom \nlabel" ]
+	label_ns [ label="Malicious actor \nwho can label ns" ]
+	ref_grant [ label="ReferenceGrant in \nmalicious ns" ]
+	malicious_dev [ label="Malicious developer" ]
+	compromised_creds [ label="Compromised credentials" ]
+	
+
+	// List of Edges
+	route_traffic -> malicious_route
+	route_traffic -> social_engineering
+	malicious_route -> shared_gw_route
+	malicious_route -> single_gw_route
+	shared_gw_route -> misconfigured_shared_gw
+	misconfigured_shared_gw -> malicious_admin
+	misconfigured_shared_gw -> custom_label
+	custom_label -> label_ns
+	single_gw_route -> ref_grant
+	single_gw_route -> single_tenant_route
+	single_tenant_route -> malicious_dev
+	single_tenant_route -> compromised_creds
+
+	// Subgraphs / Clusters
+
+	// these clusters enforce the correct hierarchies
+  
+	subgraph same_level_a {
+		rank=same;
+		malicious_route
+		social_engineering
+	}
+
+	subgraph same_level_b {
+		rank=same;
+		shared_gw_route
+		single_gw_route
+	}
+
+	subgraph same_level_c {
+		rank=same;
+		misconfigured_shared_gw
+		ref_grant
+		single_tenant_route
+	}
+
+	subgraph same_level_d {
+		rank=same;
+		malicious_admin
+		custom_label
+		malicious_dev
+		compromised_creds
+	}
+}
