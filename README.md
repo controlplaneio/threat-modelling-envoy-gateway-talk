@@ -231,9 +231,9 @@ make curl-tenant-d
 
 ## Compromised Proxy Scenario
 
-:warning: We have explored what an attacker would need to do in order to create a malicious HTTPRoute. An even more attractive target would be for the attacker to take over an Envoy Proxy, either by exploiting a vulnerability to achieve RCE, or by configuring Envoy Gateway to deploy a proxy using a vulnerable or maliciously crafted image. Let's look at the naive case, whereby a new tenant (Tenant E) simply deploys a maliciously crafted Envoy Proxy.
+:warning: We have explored what an attacker would need to do in order to create a malicious HTTPRoute. An even more attractive target would be for the attacker to take over an Envoy Proxy instance, either by exploiting an existing vulnerability to achieve RCE (remote code execution), or by configuring Envoy Gateway to deploy a proxy using a vulnerable or maliciously crafted image. Let's look at the more naive case, whereby a new tenant (Tenant E) simply deploys a maliciously crafted Envoy Proxy.
 
-First we will build an image and load it into our kind cluster. Rather than a realistic example, we are simply going to install `tcpdump` on top of an Envoy Proxy base image, and copy in the `tcpdump.sh` script which we can run from within the container to demonstrate the threat:
+First, we will build an image and load it into our kind cluster. For this demo, we are simply going to install [tcpdump](https://www.tcpdump.org/) on top of an Envoy Proxy base image, and copy in the `tcpdump.sh` script, which we can run from within the container to demonstrate the threat:
 
 ```bash
 make build-malicious-envoy
@@ -270,9 +270,9 @@ Switch back to the original terminal window and observe the request that we just
 - :warning: exploit known vulnerabilities in an unpatched Envoy Proxy
 - :warning: exploit weaknesses in the Kubernetes cluster to move laterally from a compromised pod to an Envoy Pod
 
-:warning: To further explore the consequences of multi-tenancy, let's consider the most general scenario where we have multiple Gateways in different namespaces within the cluster (each referencing a different GatewayClass), and one of the Gateway pods is compromised (e.g. through one of the above routes). Could our attacker now modify an EnvoyProxy in a different namespace to that of the compromised Envoy Gateway?
+:warning: To further explore the consequences of [multi-tenancy](https://gateway.envoyproxy.io/latest/user/deployment-mode/#multi-tenancy), let's consider a general scenario where we have multiple Gateways in different namespaces within the cluster (each referencing a different GatewayClass). Within this simple scenario, one of the Gateway pods is compromised (e.g. through one of the above routes). Now, could our attacker modify an EnvoyProxy in a different namespace to that of the compromised Envoy Gateway?
 
-Note that in our example, we have not used Envoy Gateway's namespaced mode, so each Envoy Gateway has Kubernetes permissions defined by a ClusterRole. Let's imagine that Tenant A has been compromised, and the attacker wants to modify the Shared Envoy Proxy. Firstly we can look at the Envoy Gateway ClusterRole used by Tenant A's Gateway:
+Note that in our example, we have not used Envoy Gateway's [namespaced mode](https://github.com/envoyproxy/gateway/pull/1656) which will be available in v0.6.0, so each Envoy Gateway has Kubernetes permissions defined by a ClusterRole, and watches for resources in all namespaces as detailed [here](https://gateway.envoyproxy.io/latest/user/deployment-mode/). Let's imagine that Tenant A has been compromised, and the attacker wants to modify the Shared Envoy Proxy. Firstly we can look at the Envoy Gateway ClusterRole used by Tenant A's Gateway:
 
 ```bash
 kubectl describe clusterrole eg-tenant-a-gateway-helm-envoy-gateway-role | grep envoyproxies
@@ -316,7 +316,7 @@ This is by design in Gateway API! As per the [API specification](https://gateway
 ./scripts/perform-action-as-gateway.sh kubectl describe secrets -A
 ```
 
-## Talk Demons
+## Talk Demos
 
 The minimal base infra required to run the demos for the talk can be set up using:
 
